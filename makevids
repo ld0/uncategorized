@@ -1,0 +1,42 @@
+#!/bin/bash
+# Author: ld0
+# Version 2.1
+# TODO:
+#	1. make conversion to video take in .wav 
+#	2. allow for ogg input file conversion 
+#	3. delete temporary file created if audio conversion takes place
+#	4. create default output name (input.mp4) if not specified
+#
+
+#
+# /.makevids $1 $2 $3
+#	$1 = image desired to have the video feature as its only image
+#	$2 = audio file desired to have the video feature.
+#				v.1.0 	mp3 only
+#				v.2.0+	mp3 or wav
+#	$3 = desired output file name
+#
+if [ "$#" -eq 3 ]
+then
+        
+        in_img=$1
+        in_audio=$2
+        out_vid="$3\.mp4"
+        ext=${in_audio: (-3) } # get file extension
+        
+        # convert to mp3 if it's wav file
+        if [ $ext == "wav" ]
+        then
+			new_audio=${in_audio::-3}"mp3"
+			ffmpeg -i $in_audio -vn -ar 44100 -ac 2 -ab 192k -f mp3 $new_audio
+			
+        fi
+        
+        in_audio=${in_audio::-3}"mp3"
+		# smallest video possible 
+        ffmpeg -r 1 -loop 1 -i $in_img -i $in_audio -acodec copy -r 1 -shortest -vf scale=1280:720 $out_vid
+
+# elif there weren't enough arguments
+else
+        echo "Incorrect number of arguments. image audio outname"
+fi
